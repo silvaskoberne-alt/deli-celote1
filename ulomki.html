@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ulomki – Interaktivne vaje | 7. razred NIS</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue:   #2C7BE5;
+    --blue2:  #1a5cbf;
+    --green:  #27AE60;
+    --green2: #1e8449;
+    --red:    #E74C3C;
+    --orange: #F39C12;
+    --purple: #8E44AD;
+    --bg:     #F0F4FF;
+    --card:   #FFFFFF;
+    --text:   #1a1a2e;
+    --muted:  #6B7280;
+    --radius: 20px;
+    --shadow: 0 8px 32px rgba(44,123,229,0.13);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated background blobs */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: -1;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(44,123,229,0.12) 0%, transparent 40%),
+      radial-gradient(circle at 85% 75%, rgba(39,174,96,0.10) 0%, transparent 40%),
+      radial-gradient(circle at 50% 50%, rgba(143,68,173,0.06) 0%, transparent 60%),
+      #F0F4FF;
+  }
+
+  /* ── HEADER ─────────────────────────────────────────────────── */
+  header {
+    background: linear-gradient(135deg, var(--blue) 0%, #1a3a8f 100%);
+    color: white;
+    padding: 28px 24px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  header::after {
+    content: '';
+    position: absolute; bottom: -1px; left: 0; right: 0; height: 30px;
+    background: var(--bg);
+    clip-path: ellipse(55% 100% at 50% 100%);
+  }
+  header h1 {
+    font-family: 'Fredoka', sans-serif;
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  header p { font-size: 1rem; opacity: 0.85; margin-top: 6px; }
+
+  /* Stars decoration */
+  .stars { font-size: 1.4rem; letter-spacing: 6px; margin-bottom: 8px; }
+
+  /* ── SCORE BAR ───────────────────────────────────────────────── */
+  .score-bar {
+    display: flex; align-items: center; justify-content: center; gap: 20px;
+    padding: 14px 24px;
+    background: white;
+    border-bottom: 2px solid rgba(44,123,229,0.1);
+    flex-wrap: wrap;
+  }
+  .score-chip {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--blue);
+    color: white;
+    padding: 8px 18px;
+    border-radius: 50px;
+    font-weight: 700; font-size: 1rem;
+    box-shadow: 0 3px 10px rgba(44,123,229,0.3);
+  }
+  .score-chip.green { background: var(--green); box-shadow: 0 3px 10px rgba(39,174,96,0.3); }
+  .score-chip.orange { background: var(--orange); box-shadow: 0 3px 10px rgba(243,156,18,0.3); }
+
+  /* ── NAVIGATION TABS ─────────────────────────────────────────── */
+  .tabs {
+    display: flex; gap: 8px; padding: 20px 20px 0;
+    flex-wrap: wrap; justify-content: center;
+  }
+  .tab {
+    padding: 10px 20px;
+    border-radius: 50px;
+    border: 2.5px solid transparent;
+    background: white;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700; font-size: 0.95rem;
+    cursor: pointer;
+    transition: all .25s;
+    color: var(--muted);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  }
+  .tab:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.1); }
+  .tab.active { background: var(--blue); color: white; border-color: var(--blue); box-shadow: 0 4px 14px rgba(44,123,229,0.35); }
+
+  /* ── MAIN LAYOUT ─────────────────────────────────────────────── */
+  main { padding: 24px 16px 60px; max-width: 860px; margin: 0 auto; }
+
+  .section { display: none; }
+  .section.active { display: block; animation: fadeIn .35s ease; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } }
+
+  /* ── CARD ────────────────────────────────────────────────────── */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 28px 24px;
+    margin-bottom: 22px;
+    box-shadow: var(--shadow);
+    border: 2px solid rgba(44,123,229,0.08);
+  }
+
+  .card-title {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.3rem; font-weight: 600;
+    color: var(--blue);
+    margin-bottom: 18px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .card-title .badge {
+    background: var(--blue);
+    color: white;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.95rem; font-weight: 800; flex-shrink: 0;
+  }
+
+  /* ── FRACTION VISUAL ─────────────────────────────────────────── */
+  .frac-display {
+    display: inline-flex; flex-direction: column; align-items: center;
+    font-family: 'Fredoka', sans-serif; font-size: 2.4rem; line-height: 1;
+    background: #EBF5FB; border-radius: 14px;
+    padding: 12px 22px; margin: 10px 12px;
+    border: 3px solid var(--blue);
+    box-shadow: 0 4px 12px rgba(44,123,229,0.15);
+  }
+  .frac-display .num { color: var(--red); font-weight: 700; }
+  .frac-display .line { width: 100%; height: 3px; background: var(--text); border-radius: 2px; margin: 4px 0; }
+  .frac-display .den { color: var(--blue); font-weight: 700; }
+
+  /* ── FRACTION BARS ───────────────────────────────────────────── */
+  .frac-bar-wrap { margin: 14px 0; }
+  .frac-bar {
+    display: flex; gap: 3px; height: 54px;
+    border-radius: 10px; overflow: hidden;
+    border: 2.5px solid var(--blue);
+  }
+  .frac-cell {
+    flex: 1; cursor: pointer;
+    transition: all .2s;
+    background: white;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; color: white; font-size: 0.85rem;
+    border-right: 1.5px solid rgba(44,123,229,0.2);
+  }
+  .frac-cell:last-child { border-right: none; }
+  .frac-cell.shaded { background: var(--blue); }
+  .frac-cell.correct-shade { background: var(--green) !important; }
+  .frac-cell.wrong-shade { background: var(--red) !important; }
+  .frac-cell:hover:not(.shaded) { background: #D6EAF8; }
+
+  /* ── INPUT FIELDS ────────────────────────────────────────────── */
+  .answer-row { display: flex; align-items: center; gap: 12px; margin: 14px 0; flex-wrap: wrap; }
+
+  input[type="number"], input[type="text"] {
+    width: 72px; height: 52px;
+    border: 2.5px solid #CBD5E1;
+    border-radius: 12px;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.6rem; font-weight: 700;
+    text-align: center; color: var(--blue);
+    transition: border-color .2s, box-shadow .2s;
+    background: white;
+    outline: none;
+  }
+  input:focus { border-color: var(--blue); box-shadow: 0 0 0 4px rgba(44,123,229,0.15); }
+  input.correct { border-color: var(--green); background: #D5F5E3; color: var(--green2); }
+  input.wrong   { border-color: var(--red);   background: #FADBD8; color: var(--red); }
+
+  .frac-input-wrap {
+    display: inline-flex; flex-direction: column; align-items: center; gap: 2px;
+  }
+  .frac-input-wrap .frac-line {
+    width: 72px; height: 3px; background: var(--text); border-radius: 2px;
+  }
+
+  .answer-label { font-size: 1.1rem; font-weight: 700; color: var(--text); }
+
+  /* ── BUTTONS ─────────────────────────────────────────────────── */
+  .btn {
+    padding: 12px 28px;
+    border: none; border-radius: 50px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800; font-size: 1rem;
+    cursor: pointer; transition: all .2s;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-primary { background: var(--blue); color: white; box-shadow: 0 4px 14px rgba(44,123,229,0.35); }
+  .btn-primary:hover { background: var(--blue2); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(44,123,229,0.4); }
+  .btn-success { background: var(--green); color: white; box-shadow: 0 4px 14px rgba(39,174,96,0.35); }
+  .btn-success:hover { background: var(--green2); transform: translateY(-2px); }
+  .btn-ghost { background: #F1F5FF; color: var(--blue); border: 2px solid var(--blue); }
+  .btn-ghost:hover { background: var(--blue); color: white; transform: translateY(-2px); }
+
+  /* ── FEEDBACK ────────────────────────────────────────────────── */
+  .feedback {
+    display: none; padding: 14px 18px;
+    border-radius: 14px; margin-top: 14px;
+    font-weight: 700; font-size: 1.05rem;
+    align-items: center; gap: 10px;
+  }
+  .feedback.show { display: flex; animation: pop .3s cubic-bezier(.34,1.56,.64,1); }
+  .feedback.ok   { background: #D5F5E3; color: var(--green2); border: 2px solid var(--green); }
+  .feedback.err  { background: #FADBD8; color: #922B21; border: 2px solid var(--red); }
+  .feedback.hint { background: #FEF9E7; color: #7D6608; border: 2px solid var(--orange); }
+  @keyframes pop { from { transform: scale(.85); opacity:0; } to { transform: scale(1); opacity:1; } }
+
+  /* ── PROGRESS ────────────────────────────────────────────────── */
+  .progress-wrap { margin-bottom: 20px; }
+  .progress-label { font-size: 0.9rem; font-weight: 700; color: var(--muted); margin-bottom: 6px; }
+  .progress-track {
+    height: 12px; background: #E2E8F0;
+    border-radius: 50px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; background: linear-gradient(90deg, var(--blue), var(--green));
+    border-radius: 50px; transition: width .5s ease;
+  }
+
+  /* ── DRAG & DROP MATCH ───────────────────────────────────────── */
+  .match-grid { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+  .match-col { flex: 1; min-width: 140px; }
+  .match-col h4 { font-weight: 800; font-size: 0.9rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+
+  .drag-item {
+    background: white; border: 2.5px solid var(--blue);
+    border-radius: 14px; padding: 12px 16px;
+    margin-bottom: 10px; cursor: grab;
+    font-weight: 700; font-size: 1.1rem; color: var(--blue);
+    text-align: center;
+    transition: all .2s; box-shadow: 0 2px 8px rgba(44,123,229,0.1);
+    user-select: none;
+  }
+  .drag-item:hover { transform: translateY(-3px) rotate(-1deg); box-shadow: 0 8px 20px rgba(44,123,229,0.2); }
+  .drag-item.dragging { opacity: .5; cursor: grabbing; }
+  .drag-item.matched-ok { background: #D5F5E3; border-color: var(--green); color: var(--green2); cursor: default; }
+  .drag-item.matched-err { background: #FADBD8; border-color: var(--red); color: var(--red); cursor: default; }
+
+  .drop-zone {
+    background: #F8FAFF; border: 2.5px dashed #CBD5E1;
+    border-radius: 14px; padding: 12px 16px;
+    margin-bottom: 10px; min-height: 54px;
+    font-weight: 700; font-size: 1rem; color: var(--muted);
+    text-align: center; transition: all .2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .drop-zone.over { border-color: var(--blue); background: #EBF5FB; }
+  .drop-zone.filled-ok { border-color: var(--green); background: #D5F5E3; border-style: solid; color: var(--green2); }
+  .drop-zone.filled-err { border-color: var(--red); background: #FADBD8; border-style: solid; color: var(--red); }
+
+  /* ── QUIZ MULTIPLE CHOICE ────────────────────────────────────── */
+  .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+  @media(max-width: 500px) { .choices { grid-template-columns: 1fr; } }
+
+  .choice-btn {
+    padding: 14px 18px;
+    border: 2.5px solid #CBD5E1;
+    border-radius: 16px; background: white;
+    font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 700;
+    cursor: pointer; text-align: left; transition: all .2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  .choice-btn:hover:not(:disabled) { border-color: var(--blue); background: #EBF5FB; transform: translateY(-2px); }
+  .choice-btn.correct { border-color: var(--green); background: #D5F5E3; color: var(--green2); }
+  .choice-btn.wrong   { border-color: var(--red);   background: #FADBD8; color: var(--red); }
+  .choice-btn:disabled { cursor: default; }
+
+  /* ── STORY PROBLEM ───────────────────────────────────────────── */
+  .story-box {
+    background: linear-gradient(135deg, #FEF9E7, #FDF2F8);
+    border: 2.5px solid var(--orange);
+    border-radius: 18px; padding: 20px 22px; margin-bottom: 18px;
+  }
+  .story-box .emoji { font-size: 2.5rem; margin-bottom: 10px; display: block; }
+  .story-box p { font-size: 1.1rem; line-height: 1.7; }
+
+  /* ── CELEBRATION ─────────────────────────────────────────────── */
+  .celebration {
+    text-align: center; padding: 30px 20px;
+    animation: fadeIn .5s ease;
+  }
+  .celebration .big-emoji { font-size: 5rem; display: block; margin-bottom: 16px;
+    animation: bounce 1s infinite alternate; }
+  @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-16px); } }
+  .celebration h2 { font-family: 'Fredoka', sans-serif; font-size: 2rem; color: var(--green); margin-bottom: 10px; }
+  .celebration p { font-size: 1.1rem; color: var(--muted); }
+
+  /* ── STAR RATING ─────────────────────────────────────────────── */
+  .stars-row { display: flex; gap: 6px; margin: 10px 0; }
+  .star {
+    font-size: 2rem; cursor: pointer; transition: transform .15s;
+    filter: grayscale(1); opacity: .4;
+  }
+  .star.lit { filter: none; opacity: 1; transform: scale(1.2); }
+  .star:hover { transform: scale(1.3); }
+
+  /* ── SECTION TITLE ───────────────────────────────────────────── */
+  .section-head {
+    display: flex; align-items: center; gap: 14px; margin-bottom: 22px;
+  }
+  .section-icon {
+    width: 52px; height: 52px; border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem; flex-shrink: 0;
+  }
+  .section-icon.blue   { background: #EBF5FB; }
+  .section-icon.green  { background: #D5F5E3; }
+  .section-icon.orange { background: #FEF9E7; }
+  .section-icon.purple { background: #F4ECF7; }
+
+  .section-head h2 { font-family: 'Fredoka', sans-serif; font-size: 1.5rem; color: var(--text); }
+  .section-head p  { font-size: 0.9rem; color: var(--muted); margin-top: 2px; }
+
+  /* ── TOOLTIP / HINT ──────────────────────────────────────────── */
+  .hint-btn {
+    background: #FEF9E7; border: 2px solid var(--orange); color: #7D6608;
+    border-radius: 50px; padding: 6px 14px;
+    font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.85rem;
+    cursor: pointer; transition: all .2s;
+  }
+  .hint-btn:hover { background: var(--orange); color: white; }
+
+  /* responsive */
+  @media(max-width: 600px) {
+    .card { padding: 20px 16px; }
+    .frac-display { font-size: 2rem; padding: 10px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="stars">⭐ ⭐ ⭐</div>
+  <h1>🔢 Ulomki — Interaktivne vaje</h1>
+  <p>7. razred · Prilagojen program (NIS) · Matematika</p>
+</header>
+
+<div class="score-bar">
+  <div class="score-chip">🏆 Točke: <span id="totalScore">0</span></div>
+  <div class="score-chip green">✅ Pravilno: <span id="correctCount">0</span></div>
+  <div class="score-chip orange">🔁 Poskusi: <span id="tryCount">0</span></div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showSection('s1', this)">🎨 Pobarvaj</button>
+  <button class="tab" onclick="showSection('s2', this)">✏️ Zapiši ulomek</button>
+  <button class="tab" onclick="showSection('s3', this)">🔗 Poveži</button>
+  <button class="tab" onclick="showSection('s4', this)">📖 Besedilne</button>
+  <button class="tab" onclick="showSection('s5', this)">🧩 Kviz</button>
+</div>
+
+<main>
+
+<!-- ─────────────────────────────────────────────────────────────
+     SECTION 1: POBARVAJ
+──────────────────────────────────────────────────────────────── -->
+<div class="section active" id="s1">
+  <div class="section-head">
+    <div class="section-icon blue">🎨</div>
+    <div><h2>Pobarvaj pravi delež</h2><p>Klikni na polja, da pobarvaj pravi delež. Nato preveri!</p></div>
+  </div>
+
+  <div id="paint-tasks"></div>
+</div>
+
+<!-- ─────────────────────────────────────────────────────────────
+     SECTION 2: ZAPIŠI ULOMEK
+──────────────────────────────────────────────────────────────── -->
+<div class="section" id="s2">
+  <div class="section-head">
+    <div class="section-icon green">✏️</div>
+    <div><h2>Zapiši ulomek</h2><p>Poglej pobarvano sliko in zapiši ulomek.</p></div>
+  </div>
+  <div id="write-tasks"></div>
+</div>
+
+<!-- ─────────────────────────────────────────────────────────────
+     SECTION 3: POVEŽI
+──────────────────────────────────────────────────────────────── -->
+<div class="section" id="s3">
+  <div class="section-head">
+    <div class="section-icon orange">🔗</div>
+    <div><h2>Poveži ulomek z opisom</h2><p>Povleci ulomek na pravo polje.</p></div>
+  </div>
+  <div id="match-task"></div>
+</div>
+
+<!-- ─────────────────────────────────────────────────────────────
+     SECTION 4: BESEDILNE NALOGE
+──────────────────────────────────────────────────────────────── -->
+<div class="section" id="s4">
+  <div class="section-head">
+    <div class="section-icon purple">📖</div>
+    <div><h2>Besedilne naloge</h2><p>Preberi in reši nalogo.</p></div>
+  </div>
+  <div id="story-tasks"></div>
+</div>
+
+<!-- ─────────────────────────────────────────────────────────────
+     SECTION 5: KVIZ
+──────────────────────────────────────────────────────────────── -->
+<div class="section" id="s5">
+  <div class="section-head">
+    <div class="section-icon blue">🧩</div>
+    <div><h2>Kviz — izberi pravi odgovor</h2><p>Izberi pravilen odgovor.</p></div>
+  </div>
+  <div id="quiz-tasks"></div>
+</div>
+
+</main>
+
+<script>
+// ── State ──────────────────────────────────────────────────────
+let score = 0, correct = 0, tries = 0;
+function addScore(pts) { score += pts; correct++; tries++; updateScoreBar(); }
+function addWrong()   { tries++; updateScoreBar(); }
+function updateScoreBar() {
+  document.getElementById('totalScore').textContent = score;
+  document.getElementById('correctCount').textContent = correct;
+  document.getElementById('tryCount').textContent = tries;
+}
+
+// ── Tab navigation ─────────────────────────────────────────────
+function showSection(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── Feedback helper ────────────────────────────────────────────
+function showFeedback(el, type, msg) {
+  el.className = 'feedback show ' + type;
+  el.innerHTML = (type==='ok' ? '🎉 ' : type==='err' ? '❌ ' : '💡 ') + msg;
+}
+
+// ══════════════════════════════════════════════════════════════
+// SECTION 1 — POBARVAJ
+// ══════════════════════════════════════════════════════════════
+const paintData = [
+  { num:1, den:2, label:"Pobarvaj 1/2" },
+  { num:2, den:4, label:"Pobarvaj 2/4" },
+  { num:3, den:5, label:"Pobarvaj 3/5" },
+  { num:1, den:3, label:"Pobarvaj 1/3" },
+  { num:4, den:8, label:"Pobarvaj 4/8" },
+  { num:2, den:6, label:"Pobarvaj 2/6" },
+];
+
+function buildPaintTasks() {
+  const wrap = document.getElementById('paint-tasks');
+  paintData.forEach((t,i) => {
+    const id = 'paint'+i;
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card-title"><div class="badge">${i+1}</div>${t.label}</div>
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:14px">
+        <div class="frac-display"><span class="num">${t.num}</span><div class="line"></div><span class="den">${t.den}</span></div>
+        <div style="flex:1;min-width:200px">
+          <div class="frac-bar-wrap">
+            <div class="frac-bar" id="${id}-bar">${buildCells(id, t.den)}</div>
+          </div>
+          <div style="font-size:.85rem;color:var(--muted);margin-top:6px">
+            Klikni na ${t.num} ${t.num===1?'polje':'polja'}
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <button class="btn btn-primary" onclick="checkPaint('${id}',${t.num},${t.den})">✅ Preveri</button>
+        <button class="hint-btn" onclick="hintPaint('${id}',${t.num})">💡 Namig</button>
+        <button class="btn btn-ghost" onclick="resetPaint('${id}',${t.den})">🔄 Ponovi</button>
+      </div>
+      <div class="feedback" id="${id}-fb"></div>
+    `;
+    wrap.appendChild(card);
+  });
+}
+
+function buildCells(id, den) {
+  let html = '';
+  for(let i=0;i<den;i++) {
+    html += `<div class="frac-cell" id="${id}-c${i}" onclick="toggleCell('${id}-c${i}')"></div>`;
+  }
+  return html;
+}
+
+function toggleCell(cid) {
+  const c = document.getElementById(cid);
+  if(c.classList.contains('correct-shade') || c.classList.contains('wrong-shade')) return;
+  c.classList.toggle('shaded');
+}
+
+function checkPaint(id, num, den) {
+  const bar = document.getElementById(id+'-bar');
+  const cells = bar.querySelectorAll('.frac-cell');
+  const shaded = [...cells].filter(c => c.classList.contains('shaded')).length;
+  const fb = document.getElementById(id+'-fb');
+  if(shaded === num) {
+    cells.forEach(c => { if(c.classList.contains('shaded')) c.classList.add('correct-shade'); });
+    showFeedback(fb,'ok', `Bravo! Pravilno si pobarvал/а ${num}/${den}! 🌟`);
+    addScore(10);
+  } else {
+    showFeedback(fb,'err', `Pobarvал/а si ${shaded} polj. Potrebuješ točno ${num} ${num===1?'polje':'polja'}.`);
+    addWrong();
+  }
+}
+
+function hintPaint(id, num) {
+  const fb = document.getElementById(id+'-fb');
+  showFeedback(fb,'hint', `Pobarvaj TOČNO ${num} ${num===1?'polje':'polja'} (klikni na ${num} ${num===1?'kvadratek':'kvadratke'}).`);
+}
+
+function resetPaint(id, den) {
+  for(let i=0;i<den;i++){
+    const c = document.getElementById(id+'-c'+i);
+    c.className = 'frac-cell';
+  }
+  document.getElementById(id+'-fb').className = 'feedback';
+}
+
+// ══════════════════════════════════════════════════════════════
+// SECTION 2 — ZAPIŠI ULOMEK
+// ══════════════════════════════════════════════════════════════
+const writeData = [
+  { num:2, den:5 },
+  { num:1, den:4 },
+  { num:3, den:6 },
+  { num:2, den:3 },
+  { num:5, den:8 },
+  { num:1, den:2 },
+];
+
+function buildWriteTasks() {
+  const wrap = document.getElementById('write-tasks');
+  writeData.forEach((t,i) => {
+    const id = 'write'+i;
+    // shuffle shading — show random shading, student writes it
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    // build bar
+    let barHTML = '';
+    for(let j=0;j<t.den;j++) barHTML += `<div class="frac-cell${j<t.num?' shaded':''}" style="pointer-events:none"></div>`;
+
+    card.innerHTML = `
+      <div class="card-title"><div class="badge">${i+1}</div>Kateri ulomek prikazuje slika?</div>
+      <div class="frac-bar-wrap" style="max-width:500px">
+        <div class="frac-bar">${barHTML}</div>
+      </div>
+      <div style="font-size:.85rem;color:var(--muted);margin:8px 0 16px">Pobarvano = modro, belo = nepobarvano</div>
+      <div class="answer-row">
+        <div class="answer-label">Ulomek:</div>
+        <div class="frac-input-wrap">
+          <input type="number" id="${id}-n" min="0" max="20" placeholder="?" />
+          <div class="frac-line"></div>
+          <input type="number" id="${id}-d" min="1" max="20" placeholder="?" />
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
+        <button class="btn btn-primary" onclick="checkWrite('${id}',${t.num},${t.den})">✅ Preveri</button>
+        <button class="hint-btn" onclick="hintWrite('${id}',${t.num},${t.den})">💡 Namig</button>
+      </div>
+      <div class="feedback" id="${id}-fb"></div>
+    `;
+    wrap.appendChild(card);
+  });
+}
+
+function checkWrite(id, num, den) {
+  const n = parseInt(document.getElementById(id+'-n').value);
+  const d = parseInt(document.getElementById(id+'-d').value);
+  const ni = document.getElementById(id+'-n');
+  const di = document.getElementById(id+'-d');
+  const fb = document.getElementById(id+'-fb');
+  if(isNaN(n)||isNaN(d)) { showFeedback(fb,'hint','Vpiši obe številki.'); return; }
+  if(n===num && d===den) {
+    ni.className='correct'; di.className='correct';
+    showFeedback(fb,'ok',`Odlično! Ulomek je ${num}/${den}. ⭐`);
+    addScore(10);
+  } else {
+    ni.className='wrong'; di.className='wrong';
+    showFeedback(fb,'err',`Ni pravilno. Preveri — koliko je pobarvanih in koliko vseh delov.`);
+    addWrong();
+  }
+}
+
+function hintWrite(id, num, den) {
+  const fb = document.getElementById(id+'-fb');
+  showFeedback(fb,'hint',`Skupaj je ${den} delov, pobarvanih je ${num}. Imenovalec = ${den}, števec = ${num}.`);
+}
+
+// ══════════════════════════════════════════════════════════════
+// SECTION 3 — POVEŽI (drag & drop)
+// ══════════════════════════════════════════════════════════════
+const matchPairs = [
+  { frac:'1/2',  label:'ena polovica' },
+  { frac:'1/4',  label:'ena četrtina' },
+  { frac:'3/4',  label:'tri četrtine' },
+  { frac:'1/3',  label:'ena tretjina' },
+  { frac:'2/3',  label:'dve tretjini' },
+  { frac:'2/4',  label:'dve četrtini' },
+];
+
+function buildMatchTask() {
+  const wrap = document.getElementById('match-task');
+  // shuffle labels
+  const shuffled = [...matchPairs].sort(()=>Math.random()-.5);
+
+  let leftHTML = '';
+  matchPairs.forEach(p => {
+    leftHTML += `<div class="drag-item" draggable="true" data-frac="${p.frac}" id="drag-${p.frac.replace('/','_')}">${p.frac}</div>`;
+  });
+
+  let rightHTML = '';
+  shuffled.forEach(p => {
+    rightHTML += `<div class="drop-zone" data-label="${p.label}" id="drop-${p.label.replace(/ /g,'_')}">${p.label}</div>`;
+  });
+
+  wrap.innerHTML = `
+    <div class="card">
+      <div class="card-title"><div class="badge">→</div>Povleci ulomek na pravo polje</div>
+      <p style="color:var(--muted);font-size:.9rem;margin-bottom:18px">Primi ulomek (levo) in ga spusti na pravo polje (desno).</p>
+      <div class="match-grid">
+        <div class="match-col"><h4>Ulomki</h4><div id="drag-col">${leftHTML}</div></div>
+        <div class="match-col"><h4>Besede</h4><div id="drop-col">${rightHTML}</div></div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px">
+        <button class="btn btn-primary" onclick="checkMatch()">✅ Preveri vse</button>
+        <button class="btn btn-ghost" onclick="buildMatchTask()">🔄 Ponovi</button>
+      </div>
+      <div class="feedback" id="match-fb"></div>
+    </div>
+  `;
+
+  // drag events
+  document.querySelectorAll('.drag-item').forEach(item => {
+    item.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('frac', item.dataset.frac);
+      e.dataTransfer.setData('dragId', item.id);
+      item.classList.add('dragging');
+    });
+    item.addEventListener('dragend', () => item.classList.remove('dragging'));
+  });
+
+  document.querySelectorAll('.drop-zone').forEach(zone => {
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('over'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('over'));
+    zone.addEventListener('drop', e => {
+      e.preventDefault();
+      zone.classList.remove('over');
+      const frac = e.dataTransfer.getData('frac');
+      const dragId = e.dataTransfer.getData('dragId');
+      // place frac text in zone, remember which frac
+      zone.dataset.dropped = frac;
+      zone.textContent = zone.dataset.label + '  →  ' + frac;
+      zone.style.fontWeight = '700';
+    });
+  });
+}
+
+function checkMatch() {
+  let allCorrect = 0;
+  matchPairs.forEach(p => {
+    const zone = document.querySelector(`.drop-zone[data-label="${p.label}"]`);
+    if(!zone) return;
+    if(zone.dataset.dropped === p.frac) {
+      zone.className = 'drop-zone filled-ok'; allCorrect++;
+    } else if(zone.dataset.dropped) {
+      zone.className = 'drop-zone filled-err';
+    }
+  });
+  const fb = document.getElementById('match-fb');
+  if(allCorrect === matchPairs.length) {
+    showFeedback(fb,'ok','Vse pravilno! Odlično si povezal/a ulomke! 🏆');
+    addScore(30);
+  } else {
+    showFeedback(fb,'err',`Pravilno: ${allCorrect}/${matchPairs.length}. Rdeča polja so napačna — poskusi znova.`);
+    addWrong();
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// SECTION 4 — BESEDILNE NALOGE
+// ══════════════════════════════════════════════════════════════
+const stories = [
+  { emoji:'🍕', text:`Mama je naročila pico. Razrezali so jo na <strong>8 enakih kosov</strong>. Nejc je pojedel <strong>3 kose</strong>.<br><br>Kateri del pice je Nejc pojedel?`, num:3, den:8, hint:'Skupaj je 8 kosov, Nejc je jedel 3.' },
+  { emoji:'🍫', text:`Čokolada ima <strong>6 koščkov</strong>. Taja je pojedla <strong>2 koščka</strong>.<br><br>Kateri del čokolade je Taja pojedla?`, num:2, den:6, hint:'Skupaj 6, pojedeni 2 → 2/6.' },
+  { emoji:'📚', text:`Knjiga ima <strong>10 poglavij</strong>. Luka je prebral <strong>4 poglavja</strong>.<br><br>Kateri del knjige je Luka prebral?`, num:4, den:10, hint:'10 poglavij skupaj, 4 prebrana → 4/10.' },
+  { emoji:'🍎', text:`V košari je <strong>5 jabolk</strong>. Mama je vzela <strong>2 jabolki</strong>.<br><br>Kateri del jabolk je mama vzela?`, num:2, den:5, hint:'5 jabolk skupaj, vzete 2 → 2/5.' },
+  { emoji:'⚽', text:`Ekipa ima <strong>9 igralcev</strong>. <strong>3 igralci</strong> so bili poškodovani.<br><br>Kateri del ekipe je bil poškodovan?`, num:3, den:9, hint:'9 igralcev skupaj, 3 poškodovani → 3/9.' },
+];
+
+function buildStoryTasks() {
+  const wrap = document.getElementById('story-tasks');
+  stories.forEach((t,i) => {
+    const id = 'story'+i;
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card-title"><div class="badge">${i+1}</div>Besedilna naloga</div>
+      <div class="story-box">
+        <span class="emoji">${t.emoji}</span>
+        <p>${t.text}</p>
+      </div>
+      <div class="answer-row">
+        <div class="answer-label">Ulomek:</div>
+        <div class="frac-input-wrap">
+          <input type="number" id="${id}-n" min="0" max="20" placeholder="?" />
+          <div class="frac-line"></div>
+          <input type="number" id="${id}-d" min="1" max="20" placeholder="?" />
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
+        <button class="btn btn-primary" onclick="checkStory('${id}',${t.num},${t.den})">✅ Preveri</button>
+        <button class="hint-btn" onclick="hintStory('${id}','${t.hint}')">💡 Namig</button>
+      </div>
+      <div class="feedback" id="${id}-fb"></div>
+    `;
+    wrap.appendChild(card);
+  });
+}
+
+function checkStory(id, num, den) {
+  const n = parseInt(document.getElementById(id+'-n').value);
+  const d = parseInt(document.getElementById(id+'-d').value);
+  const ni = document.getElementById(id+'-n');
+  const di = document.getElementById(id+'-d');
+  const fb = document.getElementById(id+'-fb');
+  if(isNaN(n)||isNaN(d)) { showFeedback(fb,'hint','Vpiši obe številki.'); return; }
+  if(n===num && d===den) {
+    ni.className='correct'; di.className='correct';
+    showFeedback(fb,'ok',`Pravilno! Odgovor je ${num}/${den}. Super! 🌟`);
+    addScore(15);
+  } else {
+    ni.className='wrong'; di.className='wrong';
+    showFeedback(fb,'err',`Ni pravilno. Razmisli: koliko je skupaj, koliko vzamemo?`);
+    addWrong();
+  }
+}
+function hintStory(id, hint) {
+  showFeedback(document.getElementById(id+'-fb'),'hint',hint);
+}
+
+// ══════════════════════════════════════════════════════════════
+// SECTION 5 — KVIZ
+// ══════════════════════════════════════════════════════════════
+const quizData = [
+  { q:'Kaj nam pove IMENOVALEC?', opts:['Na koliko delov je razdeljena celota','Koliko delov vzamemo','Kakšna je celota','Koliko je vsota'], ans:0 },
+  { q:'Kaj nam pove ŠTEVEC?', opts:['Na koliko delov je razdeljena celota','Ime ulomka','Koliko delov vzamemo','Velikost celote'], ans:2 },
+  { q:'Kateri je imenovalec v ulomku 3/7?', opts:['3','7','37','1'], ans:1 },
+  { q:'Kateri je števec v ulomku 5/9?', opts:['9','59','1','5'], ans:3 },
+  { q:'Kako preberemo ulomek 1/2?', opts:['ena sedmina','ena tretjina','ena osemnina','ena polovica'], ans:3 },
+  { q:'Kako preberemo ulomek 3/4?', opts:['tri osmine','tri četrtine','tri polovice','tri sedmine'], ans:1 },
+  { q:'Pica je razrezana na 6 kosov. Vzamemo 2 kosa. Kateri ulomek?', opts:['6/2','2/8','2/6','1/3'], ans:2 },
+  { q:'Celota je razdeljena na 10 delov. Vzamemo 7. Kateri ulomek?', opts:['10/7','7/1','3/10','7/10'], ans:3 },
+  { q:'Koliko delov vzamemo pri ulomku 4/5?', opts:['5','1','9','4'], ans:3 },
+  { q:'Na koliko delov je razdeljena celota pri ulomku 2/8?', opts:['2','10','8','6'], ans:2 },
+];
+
+let quizIndex = 0, quizScore = 0;
+
+function buildQuizTasks() {
+  const wrap = document.getElementById('quiz-tasks');
+  wrap.innerHTML = `
+    <div id="quiz-wrap">
+      <div class="progress-wrap">
+        <div class="progress-label" id="q-progress">Vprašanje 1 / ${quizData.length}</div>
+        <div class="progress-track"><div class="progress-fill" id="q-bar" style="width:0%"></div></div>
+      </div>
+      <div class="card" id="q-card"></div>
+    </div>
+  `;
+  quizIndex = 0; quizScore = 0;
+  renderQuiz();
+}
+
+function renderQuiz() {
+  const q = quizData[quizIndex];
+  document.getElementById('q-progress').textContent = `Vprašanje ${quizIndex+1} / ${quizData.length}`;
+  document.getElementById('q-bar').style.width = ((quizIndex/quizData.length)*100)+'%';
+
+  const card = document.getElementById('q-card');
+  let optsHTML = '<div class="choices">';
+  q.opts.forEach((o,i) => {
+    optsHTML += `<button class="choice-btn" id="qopt${i}" onclick="chooseQuiz(${i},${q.ans})">${o}</button>`;
+  });
+  optsHTML += '</div>';
+
+  card.innerHTML = `
+    <div class="card-title" style="font-size:1.1rem">${q.q}</div>
+    ${optsHTML}
+    <div class="feedback" id="q-fb"></div>
+    <div id="q-next" style="display:none;margin-top:14px">
+      <button class="btn btn-success" onclick="nextQuiz()">Naslednje ▶</button>
+    </div>
+  `;
+}
+
+function chooseQuiz(chosen, correct) {
+  document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+  const fb = document.getElementById('q-fb');
+  if(chosen === correct) {
+    document.getElementById('qopt'+chosen).classList.add('correct');
+    showFeedback(fb,'ok','Pravilno! 🎉');
+    quizScore++; addScore(10);
+  } else {
+    document.getElementById('qopt'+chosen).classList.add('wrong');
+    document.getElementById('qopt'+correct).classList.add('correct');
+    showFeedback(fb,'err','Ni pravilno. Pravilen odgovor je zelen.');
+    addWrong();
+  }
+  document.getElementById('q-next').style.display = 'block';
+}
+
+function nextQuiz() {
+  quizIndex++;
+  if(quizIndex >= quizData.length) {
+    // show celebration
+    document.getElementById('q-bar').style.width = '100%';
+    document.getElementById('q-card').innerHTML = `
+      <div class="celebration">
+        <span class="big-emoji">🏆</span>
+        <h2>Kviz končan!</h2>
+        <p>Pravilnih odgovorov: <strong style="color:var(--green);font-size:1.3rem">${quizScore} / ${quizData.length}</strong></p>
+        <br>
+        <div class="stars-row" style="justify-content:center">
+          ${quizScore>=8?'⭐⭐⭐':quizScore>=5?'⭐⭐':'⭐'}
+        </div>
+        <br>
+        <p style="margin-bottom:18px">${quizScore===10?'Popolno! Si pravi matematik! 🌟':quizScore>=7?'Bravo! Ulomki ti gredo odlično! 👍':'Vadi naprej — postal/a boš boljši/a! 💪'}</p>
+        <button class="btn btn-primary" onclick="buildQuizTasks()">🔄 Poskusi znova</button>
+      </div>
+    `;
+  } else {
+    renderQuiz();
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════
+buildPaintTasks();
+buildWriteTasks();
+buildMatchTask();
+buildStoryTasks();
+buildQuizTasks();
+</script>
+</body>
+</html>
